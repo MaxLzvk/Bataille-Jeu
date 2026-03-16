@@ -1,3 +1,8 @@
+/**
+ * @author: Max Gabriel Lazovik
+ * @description: The main javascript and the logic behind the game.
+ * Date finished: 16.03.2026
+ */
 //The initial 52 cards (to be distributed)
 let initialCards = [
     "carreau-1", "carreau-2", "carreau-3", "carreau-4", "carreau-5", "carreau-6", "carreau-7", "carreau-8", "carreau-9", "carreau-10", "carreau-11", "carreau-12", "carreau-13", "coeur-1", "coeur-2", "coeur-3", "coeur-4", "coeur-5", "coeur-6", "coeur-7", "coeur-8", "coeur-9", "coeur-10", "coeur-11", "coeur-12", "coeur-13", "pique-1", "pique-2", "pique-3", "pique-4", "pique-5", "pique-6", "pique-7", "pique-8", "pique-9", "pique-10", "pique-11", "pique-12", "pique-13", "trefle-1", "trefle-2", "trefle-3", "trefle-4", "trefle-5", "trefle-6", "trefle-7", "trefle-8", "trefle-9", "trefle-10", "trefle-11", "trefle-12", "trefle-13",
@@ -30,6 +35,10 @@ let plr2PlayedCards = [];
 
 let plr1PlayedCardImage = document.querySelector("#cardPlr1 img");
 let plr2PlayedCardImage = document.querySelector("#cardPlr2 img");
+
+// Temporary arrays for if both cards are the same, copies the first card of the player's cards here to show the "dos" image
+let plr1TempCards = [];
+let plr2TempCards = [];
 
 /**
  * Function to start the game
@@ -84,9 +93,8 @@ function refreshGameArea() {
     plr1CardCount.innerHTML = `${plr1Cards.length}`;
     plr2CardCount.innerHTML = `${plr2Cards.length}`;
 
-    console.log(plr1PlayedCards);
-    console.log(plr2PlayedCards);
-    isCurrentlyPlaying();
+    console.log("plr1PlayedCards" + plr1PlayedCards);
+    console.log("plr2PlayedCards" + plr2PlayedCards);
 }
 
 //Function that checks who's currently playing
@@ -103,13 +111,14 @@ function isCurrentlyPlaying() {
     console.log(plrTurn);
 };
 
-//*TODO*
 function CompareCards() {
 
     //if both playing fields are empty we return to prevent errors
     if (plr1PlayedCards.length === 0) {
+        isCurrentlyPlaying();
         return;
     } else if (plr2PlayedCards.length === 0) {
+        isCurrentlyPlaying();
         return;
     }
 
@@ -120,27 +129,88 @@ function CompareCards() {
     let cardField1 = lastPlr1.match(/\d+/g);
     let cardField2 = lastPlr2.match(/\d+/g);
 
-    if (cardField1 > cardField2) {
-        plr1Cards.push(plr1PlayedCards);
-        plr1Cards.push(plr2PlayedCards);
+    let cardNum1 = Number(cardField1);
+    let cardNum2 = Number(cardField2);
+
+    //if one of the cards is equals to null (we need this cuz of the dos card)
+    if (cardNum1 == 0 || cardNum2 == 0) {
+        isCurrentlyPlaying();
+        return;
+    }
+
+    if (cardNum1 > cardNum2) {
+        // adds every card on the pile 1 to the player's cards
+        plr1PlayedCards.forEach(card => {
+            if (card == "dos") {
+                plr1Cards.push(plr1TempCards[0]);
+                return;
+            }
+            plr1Cards.push(card);
+        });
+
+        // adds every card on the pile 2 to the player's cards
+        plr2PlayedCards.forEach(card => {
+            if (card == "dos") {
+                plr1Cards.push(plr2TempCards[0]);
+                return;
+            }
+            plr1Cards.push(card);
+        });
+
         plr1PlayedCards = [];
         plr2PlayedCards = [];
         plr1Button.disabled = true;
-        turn.innerHTML = `${plr1Name.textContent} à gagné`;
+        turn.innerHTML = `${plr1Name.textContent} à gagné (${cardField1} > ${cardField2})`;
+        console.log(`${plr1Name.textContent} à gagné (${cardField1} > ${cardField2})`);
 
-        refreshGameArea();
-        console.log(plr1Cards);
+        setTimeout(function () {
+            refreshGameArea();
+            isCurrentlyPlaying();
+        }, 2000);
+        console.log("plr1Cards " + plr1Cards);
 
-    } else if (cardField2 > cardField1) {
-        plr2Cards.push(plr1PlayedCards);
-        plr2Cards.push(plr2PlayedCards);
+    } else if (cardNum2 > cardNum1) {
+        // adds every card on the pile 1 to the player's cards
+        plr1PlayedCards.forEach(card => {
+            if (card == "dos") {
+                plr2Cards.push(plr1TempCards[0]);
+                return;
+            }
+            plr2Cards.push(card);
+        });
+
+        // adds every card on the pile 2 to the player's cards
+        plr2PlayedCards.forEach(card => {
+            if (card == "dos") {
+                plr2Cards.push(plr2TempCards[0]);
+                return;
+            }
+            plr2Cards.push(card);
+        });
+
         plr1PlayedCards = [];
         plr2PlayedCards = [];
         plr2Button.disabled = true;
-        turn.innerHTML = `${plr2Name.textContent} à gagné`;
+        turn.innerHTML = `${plr2Name.textContent} à gagné (${cardField2} > ${cardField1})`;
+        console.log(`${plr2Name.textContent} à gagné (${cardField2} > ${cardField1})`);
 
-        refreshGameArea();
-        console.log(plr2Cards);
+        setTimeout(function () {
+            refreshGameArea();
+            isCurrentlyPlaying();
+        }, 2000);
+        console.log("plr2Cards " + plr2Cards);
+    } else if (cardNum1 == cardNum2) {
+        isCurrentlyPlaying();
+
+        //Replace the next card to be played with "dos" 
+        plr1TempCards.push(plr1Cards[0]);
+        plr1Cards.shift();
+        plr1Cards.unshift("dos");
+
+        //Replace the next card to be played with "dos"
+        plr2TempCards.push(plr1Cards[0]);
+        plr2Cards.shift();
+        plr2Cards.unshift("dos");
     }
 }
 
@@ -169,7 +239,6 @@ plr2Button.addEventListener('click', event => {
     plr2CardCount.innerHTML -= 1;
 
     //activate the oponnent's play button, and deactivates the current player's play button
-    plr1Button.disabled = false;
     plr2Button.disabled = true;
     plrTurn = 1;
     refreshGameArea();
