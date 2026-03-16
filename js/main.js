@@ -74,6 +74,9 @@ function distributeAndMixCards() {
     console.log(plr2Cards);
 }
 
+/**
+ * Function to update/refresh the game area
+ */
 function refreshGameArea() {
     let lastPlr1 = plr1PlayedCards[plr1PlayedCards.length - 1];
     let lastPlr2 = plr2PlayedCards[plr2PlayedCards.length - 1];
@@ -211,6 +214,15 @@ function CompareCards() {
         plr2TempCards.push(plr1Cards[0]);
         plr2Cards.shift();
         plr2Cards.unshift("dos");
+    }
+
+
+
+    //if any of the players have 0 cards, we re-distribute the cards
+    if(plr1Cards == 0 || plr2Cards == 0) {
+        plr1Cards = [];
+        plr2Cards = [];
+        start();
     }
 }
 
